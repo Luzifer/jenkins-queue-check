@@ -48,10 +48,16 @@ func main() {
 	cw, err := cloudwatch.NewCloudWatch(auth, region.CloudWatchServicepoint)
 	perror(err)
 
+	queueSize := float64(len(tmp["items"]))
+	if queueSize == 0.0 {
+		// Workaround because of https://github.com/crowdmob/goamz/issues/254
+		queueSize = 0.000000001
+	}
+
 	_, err = cw.PutMetricDataNamespace([]cloudwatch.MetricDatum{
 		cloudwatch.MetricDatum{
 			MetricName: "Queued-Jenkins-Jobs",
-			Value:      float64(len(tmp["items"])),
+			Value:      queueSize,
 			Unit:       "Count",
 		},
 	}, "Jenkins")
